@@ -1,4 +1,0 @@
-mysql-connector-python==9.1.0
-flask===3.0.3
-flask-limiter===3.8.0
-waitress===3.0.1
