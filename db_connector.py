@@ -79,7 +79,27 @@ def insert_user(user_data):
             print("MySQL connection is closed")
 
 
+def get_story_by_genre(genre):
+    conn = create_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM story WHERE LOWER(genre) = LOWER(%s) LIMIT 1", (genre,))
+    story = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    print(story)
+    return story
+
+def get_points_by_story_id(story_id):
+    conn = create_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM points WHERE story_id = %s", (story_id,))
+    points = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return points
+
 if __name__ == '__main__':
-    get_single_user(3)
+    get_single_user(1)
+    #get_story_by_genre("History")
     # get_all_users()
     # insert_user({'name': 'Pippo', 'email': 'pippo@example.com'})

@@ -69,6 +69,51 @@ def add_user():
         print(e)
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/story', methods=['POST', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def give_story():
+    try:
+        data = request.get_json(force=True)
+
+        # Durata in minuti
+        duration_str = data.get('duration', '00:00')
+        hours, minutes = map(int, duration_str.split(':'))
+        total_minutes = hours * 60 + minutes
+        print(f"User selected total duration: {total_minutes} minutes")
+
+        # Gestione temi
+        genres = data.get('genres', [])
+        if not genres:
+            return jsonify({'error': 'No genre provided'}), 400
+
+        selected_stories = []
+        for genre in genres:
+            story = db_connector.get_story_by_genre(genre)
+            if story:
+                selected_stories.append(story)
+
+        if not selected_stories:
+            return jsonify({'error': 'No stories found for the given genres'}), 404
+
+        # Per ora prendi il primo valido, si può migliorare con random o ordinamento
+        story = selected_stories[0]
+        story_id = story['id']
+        points = db_connector.get_points_by_story_id(story_id)
+
+        # Punti disponibili (nomi) per uso dinamico nel frontend
+        point_names = [p['name'] for p in points]
+
+        return jsonify({
+            'story': story,
+            'points': points,
+            'point_names': point_names,
+            'duration_minutes': total_minutes
+        })
+
+    except Exception as e:
+        print(f"Error in /story: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=3050)
