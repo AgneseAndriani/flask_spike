@@ -99,6 +99,7 @@ def give_story():
         story = selected_stories[0]
         story_id = story['id']
         points = db_connector.get_points_by_story_id(story_id)
+        questions = db_connector.get_questions_by_story_id(story_id)
 
         # Punti disponibili (nomi) per uso dinamico nel frontend
         point_names = [p['name'] for p in points]
@@ -106,9 +107,11 @@ def give_story():
         return jsonify({
             'story': story,
             'points': points,
-            'point_names': point_names,
+            'questions': questions,
+            'point_names': [p['name'] for p in points],
             'duration_minutes': total_minutes
         })
+
 
     except Exception as e:
         print(f"Error in /story: {e}")

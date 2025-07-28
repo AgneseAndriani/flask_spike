@@ -96,7 +96,19 @@ def get_points_by_story_id(story_id):
     points = cursor.fetchall()
     cursor.close()
     conn.close()
+    print(points)
     return points
+
+def get_questions_by_story_id(story_id):
+    conn = create_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM questions WHERE story_id = %s", (story_id,))
+    questions = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    print(questions)
+    return questions
+
 
 if __name__ == '__main__':
     get_single_user(1)
