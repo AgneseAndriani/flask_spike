@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS points (
     story_id INT,
     point_id INT,
     check_completed TINYINT,
-    latitude INT,
-    longitude INT,
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
     name VARCHAR(100),
     text VARCHAR(255)
 );
@@ -70,24 +70,8 @@ INSERT INTO story (title, intro, theme, genre, duration, km, calories, steps) VA
   'As you walk these legendary streets, you will uncover secrets long buried beneath centuries of history.
 Follow the path of the ancients — a journey of glory, wisdom, and power.
 Your mission: unlock the memory of the Eternal City, one landmark at a time.
-
-1. The Colosseum - Piazza del Colosseo
-Here, blood met sand in spectacles of courage and survival.
-"To understand Romes strength, feel the echo of the crowd." Head northwest on Via dei Fori Imperiali for 350 meters.
-
-2. Roman Forum - Via della Salara Vecchia
-This was the hub of public life in Ancient Rome.
-Speeches, trials, and triumphs happened here.
-"To know their vision, stand where emperors stood."
-
-3. Palatine Hill - Via di San Gregorio
-Birthplace of Rome, home to its emperors.
-This is where Romulus first laid the stones of the Eternal City.
-"Every empire has a beginning."
-
-Conclusion:
-You have followed in the footsteps of gladiators, orators, and kings.
-The Eternal Walk lives on — in the stories you now carry with you.',
+Start walking to unlock points of interest.
+',
   'History',
   150,
   5,
@@ -98,15 +82,16 @@ The Eternal Walk lives on — in the stories you now carry with you.',
 
 
 INSERT INTO points (story_id, point_id, check_completed, latitude, longitude, name, text) VALUES
-(1, 1, 0, 41890234, 12488623, 'Colosseum', 'Welcome to the Colosseum, the heart of Roman gladiatorial battles.'),
-(1, 2, 0, 41889500, 12488400, 'Roman Forum', 'Explore the Roman Forum, the hub of ancient Roman public life.'),
-(1, 3, 0, 41891000, 12487900, 'Palatine Hill', 'Climb the Palatine Hill, the birthplace of Rome and home to emperors.'),
-(2,1,0, 0000, 0000, 'punto 1', 'trama');
+(1, 1, 0, 40.503160, 17.6482112, 'Colosseum', 'Welcome to the Colosseum, the heart of Roman gladiatorial battles. Here, blood met sand in spectacles of courage and survival. To understand Rome''s strength, feel the echo of the crowd. Head northwest on Via dei Fori Imperiali for 350 meters.'),
+(1, 2, 0, 40.503160, 17.6482112, 'Roman Forum', 'Explore the Roman Forum, the hub of ancient Roman public life. Speeches, trials, and triumphs happened here. To know their vision, stand where emperors stood. Head northwest on Via dei Fori Imperiali for 350 meters.'),
+(1, 3, 0, 40.5031929, 17.6482502, 'Palatine Hill', 'Climb the Palatine Hill, the birthplace of Rome and home to emperors. This is where Romulus first laid the stones of the Eternal City. Every empire has a beginning. Conclusion: You have followed in the footsteps of gladiators, orators, and kings.'),
+(2, 1, 0, 45.464211, 9.191383, 'punto 1', 'trama');
 
 INSERT INTO questions (story_id, point_id, question, first_answer, second_answer, third_answer, correct_answer_index) VALUES
 (1, 1, 'What was the main use of the Colosseum?', 'Religious rituals', 'Gladiator fights', 'Senate meetings', 1),
-(1, 1, 'How many people could the Colosseum hold?', '10,000', '25,000', '50,000', 2),
-(2,1,'ciao', 'ciaouno', 'ciaodue', 'ciaotre', 1);
+(1, 2, 'How many people could the Colosseum hold?', '10,000', '25,000', '50,000', 2),
+(1, 3, 'What material was used for the Colosseum?', 'Wood', 'Marble', 'Concrete', 2),
+(2, 1, 'Ciao?', 'ciaouno', 'ciaodue', 'ciaotre', 1);
 EOF
 
 echo "MySQL setup completed successfully!"

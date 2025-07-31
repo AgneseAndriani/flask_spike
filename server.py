@@ -69,6 +69,28 @@ def add_user():
         print(e)
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/complete-point', methods=['POST', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def complete_point():
+    try:
+        data = request.get_json(force=True)
+        story_id = data.get('story_id')
+        point_id = data.get('point_id')
+
+        if not story_id or not point_id:
+            return jsonify({'error': 'story_id e point_id sono obbligatori'}), 400
+
+        updated = db_connector.mark_point_as_completed(story_id, point_id)
+
+        if updated:
+            return jsonify({'success': True, 'message': 'Punto completato'})
+        else:
+            return jsonify({'success': False, 'message': 'Punto non trovato'}), 404
+
+    except Exception as e:
+        print(f"Errore in /complete-point: {e}")
+        return jsonify({'error': 'Errore interno del server'}), 500
+
 @app.route('/story', methods=['POST', 'OPTIONS'], strict_slashes=False)
 @handle_cors
 def give_story():

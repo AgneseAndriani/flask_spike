@@ -109,6 +109,26 @@ def get_questions_by_story_id(story_id):
     print(questions)
     return questions
 
+def mark_point_as_completed(story_id, point_id):
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE points SET check_completed = 1 WHERE story_id = %s AND point_id = %s",
+            (story_id, point_id)
+        )
+        conn.commit()
+        updated_rows = cursor.rowcount
+        return updated_rows > 0
+    except mysql.connector.Error as error:
+        print(f"Errore MySQL durante update point: {error}")
+        return False
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
 
 if __name__ == '__main__':
     get_single_user(1)
