@@ -1,4 +1,5 @@
 import mysql.connector
+from datetime import datetime
 
 
 def create_db_connection():
@@ -9,22 +10,6 @@ def create_db_connection():
         database="mydatabase",
         port=3306
     )
-
-def get_single_user(user_id):
-    cnx = create_db_connection()
-    cursor = cnx.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT * FROM users where id = %s", (user_id,))
-        result = cursor.fetchone()
-        print(result)
-        return result
-    except mysql.connector.Error as error:
-        print("Failed to insert into MySQL table {}".format(error))
-    finally:
-        if cnx.is_connected():
-            cursor.close()
-            cnx.close()
-            print("MySQL connection is closed")
 
 def get_user_by_email(email):
     cnx = create_db_connection()
@@ -41,25 +26,6 @@ def get_user_by_email(email):
             cursor.close()
             cnx.close()
             print("MySQL connection is closed")
-
-
-def get_all_users():
-    cnx = create_db_connection()
-    cursor = cnx.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT * FROM users")
-        result = cursor.fetchall()
-        for u in result:
-            print(u)
-        return result
-    except mysql.connector.Error as error:
-        print("Failed to insert into MySQL table {}".format(error))
-    finally:
-        if cnx.is_connected():
-            cursor.close()
-            cnx.close()
-            print("MySQL connection is closed")
-
 
 def insert_user(user_data):
     cnx = create_db_connection()
@@ -128,10 +94,68 @@ def mark_point_as_completed(story_id, point_id):
             cursor.close()
             conn.close()
 
+def insert_story_completed(user_id, story_id):
+    cnx = create_db_connection()
+    cursor = cnx.cursor()
+    try:
+        insert_query = """
+               INSERT INTO story_completed (user_id, story_id, completed_at)
+               VALUES (%s, %s, CURDATE())
+               """
+        cursor.execute(insert_query, (user_id, story_id))
+        cnx.commit()
+        return True
+    except mysql.connector.Error as error:
+        print("Failed to insert into MySQL table {}".format(error))
+        return False
+    finally:
+        if cnx.is_connected():
+            cursor.close()
+            cnx.close()
+            print("MySQL connection is closed")
+
+
+
+
+def get_user_weekly_stats(user_id):
+    try:
+        conn = create_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SET lc_time_names = 'en_US'")
+        cursor.execute("""
+            SELECT 
+          DATE_FORMAT(sc.completed_at, '%a') AS day,
+          SUM(s.km) AS total_km,
+          SUM(s.steps) AS total_steps,
+          SUM(s.calories) AS total_calories
+        FROM 
+          story_completed sc
+        JOIN 
+          story s ON sc.story_id = s.id
+        WHERE 
+          sc.user_id = %s
+        GROUP BY 
+          day
+        ORDER BY 
+          FIELD(day, 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
+        """, (user_id,))
+
+        result = cursor.fetchall()
+        print("🎯 Weekly Stats Query Result:", result)
+
+        for row in result:
+            row['total_km'] = float(row['total_km'] or 0)
+            row['total_steps'] = float(row['total_steps'] or 0)
+            row['total_calories'] = float(row['total_calories'] or 0)
+
+        return result
+    except Exception as e:
+        print(f"Errore get_user_weekly_stats: {e}")
+        return []
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':
-    get_single_user(1)
-    #get_story_by_genre("History")
-    # get_all_users()
-    # insert_user({'name': 'Pippo', 'email': 'pippo@example.com'})
+    get_story_by_genre("History")

@@ -64,6 +64,14 @@ CREATE TABLE IF NOT EXISTS questions(
     correct_answer_index TINYINT
 );
 
+CREATE TABLE IF NOT EXISTS story_completed (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    story_id INT,
+    completed_at DATE
+);
+
+
 INSERT INTO story (title, intro, theme, genre, duration, km, calories, steps) VALUES (
   'The Eternal Walk',
   'Discover the timeless wonders of ancient Rome.',

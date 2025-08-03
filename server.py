@@ -140,5 +140,44 @@ def give_story():
         return jsonify({'error': 'Internal server error'}), 500
 
 
+@app.route('/complete-story', methods=['POST', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def complete_story():
+    try:
+        data = request.get_json(force=True)
+        user_id = data.get('user_id')
+        story_id = data.get('story_id')
+
+        if not user_id or not story_id:
+            return jsonify({'error': 'user_id e story_id sono obbligatori'}), 400
+        print(f"Inserimento storia completata per user {user_id}, story {story_id}")
+        inserted = db_connector.insert_story_completed(user_id, story_id)
+
+        if inserted:
+            return jsonify({'success': True, 'message': 'Completamento registrato'})
+        else:
+            return jsonify({'success': False, 'message': 'Errore durante l\'inserimento'}), 500
+
+    except Exception as e:
+        print(f"Errore in /complete-story: {e}")
+        return jsonify({'error': 'Errore interno del server'}), 500
+
+
+@app.route('/user-weekly-stats', methods=['GET', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def user_weekly_stats():
+    try:
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'user_id è obbligatorio'}), 400
+
+        stats = db_connector.get_user_weekly_stats(user_id)
+        return jsonify(stats)
+
+    except Exception as e:
+        print(f"Errore in /user-weekly-stats: {e}")
+        return jsonify({'error': 'Errore interno del server'}), 500
+
+
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=3050)
