@@ -17,7 +17,7 @@ def handle_cors(f):
         if request.method == 'OPTIONS':
             return Response(status=204, headers={
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS, GET, POST',
+                'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, PUT',
                 'Access-Control-Allow-Headers': 'Content-Type'
             })
         return f(*args, **kwargs)
@@ -176,6 +176,47 @@ def user_weekly_stats():
 
     except Exception as e:
         print(f"Errore in /user-weekly-stats: {e}")
+        return jsonify({'error': 'Errore interno del server'}), 500
+
+@app.route('/goals', methods=['GET', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def get_goals():
+    try:
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'user_id è obbligatorio'}), 400
+
+        goals = db_connector.get_all_goals_with_user_progress(user_id)
+        return jsonify(goals)
+
+    except Exception as e:
+        print(f"Errore in /goals: {e}")
+        return jsonify({'error': 'Errore interno del server'}), 500
+
+
+@app.route('/goals/<goal_name>', methods=['PUT', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def update_goal(goal_name):
+    print("🔥 Endpoint /goals/<goal_name> chiamato con:", goal_name)
+
+    try:
+        data = request.get_json(force=True)
+        user_id = data.get('user_id')
+        progress = data.get('progress')
+        completed = data.get('completed', False)
+
+        if not user_id:
+            return jsonify({'error': 'user_id è obbligatorio'}), 400
+
+        updated = db_connector.upsert_user_goal_progress(user_id, goal_name, progress, completed)
+
+        if updated:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'message': 'Errore nell\'aggiornamento'}), 500
+
+    except Exception as e:
+        print(f"Errore in /goals/<goal_name>: {e}")
         return jsonify({'error': 'Errore interno del server'}), 500
 
 

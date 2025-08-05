@@ -156,6 +156,48 @@ def get_user_weekly_stats(user_id):
         cursor.close()
         conn.close()
 
+def get_all_goals_with_user_progress(user_id):
+    conn = create_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT
+            g.goal_name,
+            g.title,
+            g.description,
+            g.type,
+            g.category,
+            g.target,
+            COALESCE(ug.progress, 0) AS progress,
+            COALESCE(ug.completed, false) AS completed
+        FROM goals g
+        LEFT JOIN user_goal_progress ug
+            ON g.goal_name = ug.goal_name AND ug.user_id = %s
+    """
+    cursor.execute(query, (user_id,))
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return rows
+
+def upsert_user_goal_progress(user_id, goal_name, progress, completed):
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    query = """
+        INSERT INTO user_goal_progress (user_id, goal_name, progress, completed)
+        VALUES (%s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            progress = VALUES(progress),
+            completed = VALUES(completed),
+            updated_at = NOW()
+    """
+    cursor.execute(query, (user_id, goal_name, progress, completed))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
 
 if __name__ == '__main__':
     get_story_by_genre("History")

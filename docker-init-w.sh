@@ -71,6 +71,27 @@ CREATE TABLE IF NOT EXISTS story_completed (
     completed_at DATE
 );
 
+CREATE TABLE goals (
+  goal_name VARCHAR(100) PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  type TEXT,
+  category TEXT,
+  target INTEGER NOT NULL
+);
+
+CREATE TABLE user_goal_progress (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  goal_name VARCHAR(100) NOT NULL,
+  progress INTEGER DEFAULT 0,
+  completed BOOLEAN DEFAULT FALSE,
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE (user_id, goal_name),
+  FOREIGN KEY (goal_name) REFERENCES goals(goal_name)
+);
+
+
 
 INSERT INTO story (title, intro, theme, genre, duration, km, calories, steps) VALUES (
   'The Eternal Walk',
@@ -100,6 +121,13 @@ INSERT INTO questions (story_id, point_id, question, first_answer, second_answer
 (1, 2, 'How many people could the Colosseum hold?', '10,000', '25,000', '50,000', 2),
 (1, 3, 'What material was used for the Colosseum?', 'Wood', 'Marble', 'Concrete', 2),
 (2, 1, 'Ciao?', 'ciaouno', 'ciaodue', 'ciaotre', 1);
+
+INSERT INTO goals (goal_name, title, description, type, category, target) VALUES
+  ('first_story', 'Completa la tua prima storia', 'Inizia il tuo viaggio e completa una storia qualsiasi.', 'one-time', 'story', 1),
+  ('long_story_60min', 'Completa una storia da 60 minuti', 'Porta a termine una storia con una durata di almeno un’ora.', 'one-time', 'story', 60),
+  ('walk_5km', 'Percorri 5 km', 'Cammina o corri almeno 5 chilometri.', 'one-time', 'movement', 5),
+  ('monthly_steps_20000', 'Fai 20.000 passi in un mese', 'Muoviti costantemente e raggiungi 20.000 passi entro fine mese.', 'monthly', 'movement', 20000);
+
 EOF
 
 echo "MySQL setup completed successfully!"
