@@ -197,7 +197,6 @@ def get_goals():
 @app.route('/goals/<goal_name>', methods=['PUT', 'OPTIONS'], strict_slashes=False)
 @handle_cors
 def update_goal(goal_name):
-    print("🔥 Endpoint /goals/<goal_name> chiamato con:", goal_name)
 
     try:
         data = request.get_json(force=True)
@@ -219,6 +218,41 @@ def update_goal(goal_name):
         print(f"Errore in /goals/<goal_name>: {e}")
         return jsonify({'error': 'Errore interno del server'}), 500
 
+@app.route('/preferences', methods=['GET', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def get_preferences():
+    try:
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'user_id è obbligatorio'}), 400
+
+        prefs = db_connector.get_preferences_by_user(user_id)
+        return jsonify({'success': True, 'preferences': prefs}), 200
+
+    except Exception as e:
+        print(f"Errore in /preferences (GET): {e}")
+        return jsonify({'success': False, 'message': 'Errore interno del server'}), 500
+
+
+@app.route('/preferences/adding', methods=['POST', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def save_preferences_bulk():
+    try:
+        data = request.get_json(force=True) or {}
+        user_id = data.get('user_id')
+        genres  = data.get('genres') or []
+
+        if not user_id or not isinstance(genres, list):
+            return jsonify({'success': False, 'message': 'Payload non valido'}), 400
+        if len(genres) == 0:
+            return jsonify({'success': False, 'message': 'Nessun genere selezionato'}), 400
+
+        inserted = db_connector.replace_user_preferences(user_id, genres)
+        return jsonify({'success': True, 'inserted': inserted}), 200
+
+    except Exception as e:
+        print(f"Errore in /preferences/adding: {e}")
+        return jsonify({'success': False, 'message': 'Errore interno del server'}), 500
 
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=3050)

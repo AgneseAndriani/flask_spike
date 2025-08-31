@@ -141,7 +141,6 @@ def get_user_weekly_stats(user_id):
         """, (user_id,))
 
         result = cursor.fetchall()
-        print("🎯 Weekly Stats Query Result:", result)
 
         for row in result:
             row['total_km'] = float(row['total_km'] or 0)
@@ -197,6 +196,89 @@ def upsert_user_goal_progress(user_id, goal_name, progress, completed):
     cursor.close()
     conn.close()
     return True
+def get_preferences_by_user(user_id):
+    conn = create_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT id, user_id, genre FROM preferences WHERE user_id = %s ORDER BY id ASC",
+            (user_id,)
+        )
+        rows = cursor.fetchall()
+        return rows
+    except mysql.connector.Error as error:
+        print(f"Errore MySQL get_preferences_by_user: {error}")
+        return []
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+def replace_user_preferences(user_id, genres):
+
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    try:
+        # 1) elimina le preferenze esistenti
+        cursor.execute("DELETE FROM preferences WHERE user_id = %s", (user_id,))
+
+        # 2) inserisce le nuove (evita duplicati nella lista)
+        unique_genres = list(dict.fromkeys([g.strip() for g in genres if g and g.strip()]))
+
+        if not unique_genres:
+            conn.commit()
+            return 0
+
+        insert_query = "INSERT INTO preferences (user_id, genre) VALUES (%s, %s)"
+        values = [(user_id, g) for g in unique_genres]
+        cursor.executemany(insert_query, values)
+        conn.commit()
+        return cursor.rowcount
+    except mysql.connector.Error as error:
+        print(f"Errore MySQL replace_user_preferences: {error}")
+        conn.rollback()
+        return 0
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+def get_single_user(user_id):
+    conn = create_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT id, name, username, email, password, total_km, total_calories, total_steps FROM users WHERE id = %s",
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        return row
+    except mysql.connector.Error as error:
+        print(f"Errore MySQL get_single_user: {error}")
+        return None
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+def get_all_users():
+    conn = create_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT id, name, username, email, password, total_km, total_calories, total_steps FROM users ORDER BY id ASC"
+        )
+        rows = cursor.fetchall()
+        return rows
+    except mysql.connector.Error as error:
+        print(f"Errore MySQL get_all_users: {error}")
+        return []
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
 
 
 if __name__ == '__main__':

@@ -91,6 +91,12 @@ CREATE TABLE user_goal_progress (
   FOREIGN KEY (goal_name) REFERENCES goals(goal_name)
 );
 
+CREATE TABLE preferences (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    genre VARCHAR(100)
+);
+
 
 
 INSERT INTO story (title, intro, theme, genre, duration, km, calories, steps) VALUES (
