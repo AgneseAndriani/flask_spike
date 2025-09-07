@@ -94,7 +94,8 @@ CREATE TABLE user_goal_progress (
 CREATE TABLE preferences (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
-    genre VARCHAR(100)
+    genre VARCHAR(100),
+    point_of_interest VARCHAR(100)
 );
 
 

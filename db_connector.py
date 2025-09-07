@@ -201,7 +201,7 @@ def get_preferences_by_user(user_id):
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(
-            "SELECT id, user_id, genre FROM preferences WHERE user_id = %s ORDER BY id ASC",
+            "SELECT id, user_id, genre, point_of_interest FROM preferences WHERE user_id = %s ORDER BY id ASC",
             (user_id,)
         )
         rows = cursor.fetchall()
@@ -221,7 +221,7 @@ def replace_user_preferences(user_id, genres):
     cursor = conn.cursor()
     try:
         # 1) elimina le preferenze esistenti
-        cursor.execute("DELETE FROM preferences WHERE user_id = %s", (user_id,))
+        cursor.execute("DELETE FROM preferences WHERE user_id = %s AND genre IS NOT NULL", (user_id,))
 
         # 2) inserisce le nuove (evita duplicati nella lista)
         unique_genres = list(dict.fromkeys([g.strip() for g in genres if g and g.strip()]))
@@ -232,6 +232,36 @@ def replace_user_preferences(user_id, genres):
 
         insert_query = "INSERT INTO preferences (user_id, genre) VALUES (%s, %s)"
         values = [(user_id, g) for g in unique_genres]
+        cursor.executemany(insert_query, values)
+        conn.commit()
+        return cursor.rowcount
+    except mysql.connector.Error as error:
+        print(f"Errore MySQL replace_user_preferences: {error}")
+        conn.rollback()
+        return 0
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+def replace_user_points(user_id, point_of_interest):
+
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    try:
+        # 1) elimina le preferenze esistenti
+        cursor.execute("DELETE FROM preferences WHERE user_id = %s AND point_of_interest IS NOT NULL", (user_id,))
+
+        # 2) inserisce le nuove (evita duplicati nella lista)
+        unique_point = list(dict.fromkeys([p.strip() for p in point_of_interest if p and p.strip()]))
+
+        if not unique_point:
+            conn.commit()
+            return 0
+
+        insert_query = "INSERT INTO preferences (user_id, point_of_interest) VALUES (%s, %s)"
+        values = [(user_id, p) for p in unique_point]
         cursor.executemany(insert_query, values)
         conn.commit()
         return cursor.rowcount

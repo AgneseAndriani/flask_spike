@@ -254,5 +254,25 @@ def save_preferences_bulk():
         print(f"Errore in /preferences/adding: {e}")
         return jsonify({'success': False, 'message': 'Errore interno del server'}), 500
 
+@app.route('/pointOfInterest/adding', methods=['POST', 'OPTIONS'], strict_slashes=False)
+@handle_cors
+def save_points_bulk():
+    try:
+        data = request.get_json(force=True) or {}
+        user_id = data.get('user_id')
+        point_of_interest  = data.get('point_of_interest') or []
+
+        if not user_id or not isinstance(point_of_interest, list):
+            return jsonify({'success': False, 'message': 'Payload non valido'}), 400
+        if len(point_of_interest) == 0:
+            return jsonify({'success': False, 'message': 'Nessun punto selezionato'}), 400
+
+        inserted = db_connector.replace_user_points(user_id, point_of_interest)
+        return jsonify({'success': True, 'inserted': inserted}), 200
+
+    except Exception as e:
+        print(f"Errore in /preferences/adding: {e}")
+        return jsonify({'success': False, 'message': 'Errore interno del server'}), 500
+
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=3050)
