@@ -118,7 +118,7 @@ Start walking to unlock points of interest.
 
 
 INSERT INTO points (story_id, point_id, check_completed, latitude, longitude, name, text) VALUES
-(1, 1, 0, 40.503160, 17.6482112, 'Colosseum', 'Welcome to the Colosseum, the heart of Roman gladiatorial battles. Here, blood met sand in spectacles of courage and survival. To understand Rome''s strength, feel the echo of the crowd. Head northwest on Via dei Fori Imperiali for 350 meters.'),
+(1, 1, 0, 45.078093, 7.653440, 'Colosseum', 'Welcome to the Colosseum, the heart of Roman gladiatorial battles. Here, blood met sand in spectacles of courage and survival. To understand Rome''s strength, feel the echo of the crowd. Head northwest on Via dei Fori Imperiali for 350 meters.'),
 (1, 2, 0, 40.503160, 17.6482112, 'Roman Forum', 'Explore the Roman Forum, the hub of ancient Roman public life. Speeches, trials, and triumphs happened here. To know their vision, stand where emperors stood. Head northwest on Via dei Fori Imperiali for 350 meters.'),
 (1, 3, 0, 40.5031929, 17.6482502, 'Palatine Hill', 'Climb the Palatine Hill, the birthplace of Rome and home to emperors. This is where Romulus first laid the stones of the Eternal City. Every empire has a beginning. Conclusion: You have followed in the footsteps of gladiators, orators, and kings.'),
 (2, 1, 0, 45.464211, 9.191383, 'punto 1', 'trama');
